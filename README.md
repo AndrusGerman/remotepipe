@@ -1,6 +1,15 @@
 # Remotepipe
 
-allows to create remote pipes
+allows to create remote pipes, you can create complex data flows and delegate heavy tasks to a remote computer
+
+
+### Server Example
+```bash
+./remotepipe -server true
+```
+
+
+### Client Example
 
 
 ```bash
