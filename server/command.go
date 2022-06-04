@@ -10,9 +10,8 @@ import (
 	"github.com/AndrusGerman/remotepipe/pkg/utils"
 )
 
-func run_cmd(command []byte, conn net.Conn) {
+func run_cmd(comand *utils.Command, conn net.Conn) {
 	var err error
-	comand := utils.ByteToCommand(command)
 
 	log.Printf("comand: '%s', flags: '%v', flagsNumber: '%d' \n", comand.Command, comand.Flags, len(comand.Flags))
 	cmd := exec.Command(comand.Command, comand.Flags...)
