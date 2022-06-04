@@ -5,7 +5,12 @@ allows to create remote pipes, you can create complex data flows and delegate he
 
 ### Server Example
 ```bash
-./remotepipe -server true
+./remotepipe -server
+```
+
+### Scan devices
+```bash
+./remotepipe -scan
 ```
 
 
@@ -13,29 +18,34 @@ allows to create remote pipes, you can create complex data flows and delegate he
 
 
 ```bash
-echo "andurs" | ./remotepipe localhost "cat /dev/stdin"
+echo "andurs" | ./remotepipe 127.0.0.1 "cat /dev/stdin"
 
 ```
 
 
 Encoding small file with ffmpeg
 ```bash
-cat input.mp4 | ./remotepipe localhost "ffmpeg -y -i pipe:0 -c:v libx264 -f flv pipe:1" | ffplay -
+cat input.mp4 | ./remotepipe 127.0.0.1 "ffmpeg -y -i pipe:0 -c:v libx264 -f flv pipe:1" | ffplay -
 ```
 ```bash
-cat input.mp4 | ./remotepipe localhost "ffmpeg -y -i pipe:0 -c:v libvpx-vp9 -f webm pipe:1" | ffplay -
+cat input.mp4 | ./remotepipe 192.168.101.7 "ffmpeg -y -i pipe:0 -c:v libvpx-vp9 -f webm pipe:1" | ffplay -
 ```
 
 
 Encoding a large file with ffmpeg
 ```bash
 ffmpeg -i biginput.mp4  -codec copy -map 0 -movflags +faststart -f matroska pipe:1 | 
-./remotepipe localhost "ffmpeg -y -i pipe:0 -c:v libx264 -f flv pipe:1" > newfile.mp4
+./remotepipe 192.168.101.7 "ffmpeg -y -i pipe:0 -c:v libx264 -f flv pipe:1" > newfile.mp4
 ```
 
 searching for a text with grep
 ```bash
-cat /home/andrusd/Documentos/app.py  | ./remotepipe localhost "grep hello"
+cat /home/andrusd/Documentos/app.py  | ./remotepipe 192.168.101.7 "grep hello"
+```
+
+find the first device
+```bash
+echo "hola" | ./remotepipe scan "cat /dev/stdin"
 ```
 
 ### Motivation
