@@ -14,7 +14,7 @@ func run_cmd(command []byte, conn net.Conn) {
 	var err error
 	comand := utils.ByteToCommand(command)
 
-	log.Printf("comand: '%s', flangs'%v'\n", comand.Command, comand.Flags)
+	log.Printf("comand: '%s', flags: '%v', flagsNumber: '%d' \n", comand.Command, comand.Flags, len(comand.Flags))
 	cmd := exec.Command(comand.Command, comand.Flags...)
 	cmd.Stderr = os.Stderr
 	stdout, _ := cmd.StdoutPipe()
@@ -32,8 +32,14 @@ func run_cmd(command []byte, conn net.Conn) {
 		io.Copy(stdin, conn)
 	}()
 
-	err = cmd.Run()
+	err = cmd.Start()
 	if err != nil {
-		log.Println("server: comand", err)
+		log.Println("server: start command err", err)
+		return
+	}
+
+	err = cmd.Wait()
+	if err != nil {
+		log.Println("server: Wait command err", err)
 	}
 }
