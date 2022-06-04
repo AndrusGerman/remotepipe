@@ -22,6 +22,9 @@ Encoding small file with ffmpeg
 ```bash
 cat input.mp4 | ./remotepipe localhost "ffmpeg -y -i pipe:0 -c:v libx264 -f flv pipe:1" | ffplay -
 ```
+```bash
+cat input.mp4 | ./remotepipe localhost "ffmpeg -y -i pipe:0 -c:v libvpx-vp9 -f webm pipe:1" | ffplay -
+```
 
 
 Encoding a large file with ffmpeg

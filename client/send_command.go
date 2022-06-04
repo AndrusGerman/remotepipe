@@ -14,10 +14,10 @@ import (
 
 func create_dial(host string) (net.Conn, error) {
 	return net.Dial("tcp", host+":"+config.PortTCP)
-
 }
 
 func send_comand(host string, commandRaw string) {
+	host = parse_host(host)
 	conn, err := create_dial(host)
 	if err != nil {
 		log.Println("client: net dial connection create error", err)
