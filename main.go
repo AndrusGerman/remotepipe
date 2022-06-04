@@ -15,6 +15,7 @@ func init() {
 }
 
 func main() {
+
 	// server mode
 	if serverBool {
 		server.Execute()
