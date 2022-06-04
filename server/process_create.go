@@ -9,6 +9,7 @@ import (
 )
 
 func (ctx *Proccess) Start() {
+	log.Println("server: starting proccess ", ctx.ID)
 	defer ctx.Close()
 	ctx.InitChannels()
 	waitingCanales := ctx.GetCanales()
@@ -19,6 +20,14 @@ func (ctx *Proccess) Start() {
 		return
 	}
 
+	_, err = ctx.Create.Write(make([]byte, 512)) // readyStart signal send
+	if err != nil {
+		log.Println("server: error read readyStart", err)
+		return
+	}
+
+	log.Println("server: waiting channels")
+
 	waitingCanales.Wait()
 	log.Println("server: is ready ", ctx.ID)
 
@@ -28,6 +37,7 @@ func (ctx *Proccess) Start() {
 func (ctx *Proccess) GetCanales() *sync.WaitGroup {
 	var waiting = new(sync.WaitGroup)
 	waiting.Add(3)
+
 	go func() {
 		ctx.Stder = <-ctx.ChanStder
 		waiting.Done()
@@ -58,18 +68,23 @@ func (ctx *Proccess) Close() {
 	close(ctx.ChanStdin)
 	close(ctx.ChanStdout)
 
-	if ctx.Create != nil {
-		ctx.Create.Write([]byte("ok"))
-		ctx.Create.Close()
-	}
 	if ctx.Stder != nil {
-		ctx.Stder.Close()
+		log.Println("close 1: send", ctx.Stder.Close())
+
 	}
+
+	if ctx.Stdin != nil {
+		log.Println("close 2: send", ctx.Stdin.Close())
+	}
+
 	if ctx.Stdout != nil {
+		_, err := ctx.Create.Read(make([]byte, 512)) // close stdout signal
+		log.Println("close 3: read", err)
 		ctx.Stdout.Close()
 	}
-	if ctx.Stdin != nil {
-		ctx.Stdin.Close()
+
+	if ctx.Create != nil {
+		log.Println("close 4: send", ctx.Create.Close())
 	}
 
 	delete(proccess, ctx.ID)

@@ -1,6 +1,7 @@
 package server
 
 import (
+	"fmt"
 	"log"
 	"net"
 
@@ -36,6 +37,15 @@ func client_connections(client net.Conn) {
 	}
 
 	if metadata.Type == connection.ConnectionTypeCreate {
+		var id = newID()
+		metadata.ID = string(id)
+		_, err = client.Write(id)
+		if err != nil {
+			log.Println("server: error send id", err)
+			return
+		}
+		fmt.Println("ElID: ", id)
+
 		NewProccess(metadata, client)
 		return
 	}

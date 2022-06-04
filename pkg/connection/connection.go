@@ -21,8 +21,8 @@ type ConnectionMetadata struct {
 
 func ConnectionSend(ID string, typeConn ConnectionType, conn io.Writer) error {
 	var cm = new(ConnectionMetadata)
-	cm.Type = typeConn
 	cm.ID = ID
+	cm.Type = typeConn
 	return json.NewEncoder(conn).Encode(cm)
 }
 

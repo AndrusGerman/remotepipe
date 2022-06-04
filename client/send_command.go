@@ -6,6 +6,7 @@ import (
 	"net"
 	"os"
 	"sync"
+	"time"
 
 	"github.com/AndrusGerman/remotepipe/config"
 	"github.com/AndrusGerman/remotepipe/pkg/connection"
@@ -16,26 +17,27 @@ func create_dial(host string) (net.Conn, error) {
 	return net.Dial("tcp", host+":"+config.PortTCP)
 }
 
-func send_comand(id string, host string, commandRaw string) {
+func send_comand(host string, commandRaw string) {
 	conn, err := create_dial(host)
 	if err != err {
-		log.Println("client: net dial connection create error")
+		log.Println("client: net dial connection create error", err)
 		os.Exit(1)
 	}
 	defer conn.Close()
 
-	err = connection.ConnectionSend(id, connection.ConnectionTypeCreate, conn)
+	err = connection.ConnectionSend("", connection.ConnectionTypeCreate, conn)
 	if err != err {
-		log.Println("client: connection create error")
+		log.Println("client: connection create error", err)
 		os.Exit(1)
 	}
 
-	var waitFinish = new(sync.WaitGroup)
-	waitFinish.Add(3)
-
-	go create_stder(id, host, waitFinish)
-	go create_stdin(id, host, waitFinish)
-	go create_stdout(id, host, waitFinish)
+	var idBuffer = make([]byte, 1024)
+	_, err = conn.Read(idBuffer)
+	if err != err {
+		log.Println("client: error read id", err)
+		os.Exit(1)
+	}
+	var id = string(idBuffer)
 
 	command := utils.StringToCommand(commandRaw)
 	err = command.Send(conn)
@@ -44,9 +46,37 @@ func send_comand(id string, host string, commandRaw string) {
 		os.Exit(1)
 	}
 
-	var finishSignal = make([]byte, 512)
-	conn.Read(finishSignal)
+	var waitFinish = new(sync.WaitGroup)
+	waitFinish.Add(3)
+
+	// ready readyStart
+	var readyStart = make([]byte, 512)
+	_, err = conn.Read(readyStart)
+	if err != err {
+		log.Println("client: error read readyStart ", err)
+		os.Exit(1)
+	}
+
+	go create_stder(id, host, waitFinish)
+	go create_stdin(id, host, waitFinish)
+	go create_stdout(id, host, waitFinish)
+
+	// ready readyAfterClose
+	_, err = conn.Read(make([]byte, 512))
+	if err != err {
+		log.Println("client: error read readyAfterClose ", err)
+		os.Exit(1)
+	}
+
+	// send stdout close
+	_, err = conn.Write(make([]byte, 512))
+	if err != err {
+		log.Println("client: error send close stdout ", err)
+		os.Exit(1)
+	}
+
 	waitFinish.Wait()
+	time.Sleep(1 * time.Second)
 }
 
 func create_stdin(id string, host string, waitFinish *sync.WaitGroup) {

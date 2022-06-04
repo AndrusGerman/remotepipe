@@ -4,7 +4,6 @@ import (
 	"io"
 	"log"
 	"os/exec"
-	"sync"
 
 	"github.com/AndrusGerman/remotepipe/pkg/utils"
 )
@@ -13,31 +12,39 @@ func (ctx *Proccess) run_cmd(comand *utils.Command) {
 	var err error
 	log.Printf("comand: '%s', flags: '%v'\n", comand.Command, comand.Flags)
 	cmd := exec.Command(comand.Command, comand.Flags...)
-	stder, _ := cmd.StderrPipe()
-	stdout, _ := cmd.StdoutPipe()
-	stdin, _ := cmd.StdinPipe()
+	stder, err := cmd.StderrPipe()
+	if err != nil {
+		log.Println("server: err create pipeStderr")
+		return
+	}
+	stdout, err := cmd.StdoutPipe()
+	if err != nil {
+		log.Println("server: err create pipeStdout")
+		return
+	}
+	defer stdout.Close()
+	defer stder.Close()
 
-	var waitFinish = new(sync.WaitGroup)
-	waitFinish.Add(3)
-	// send response
-	go func() {
-		defer waitFinish.Done()
-		defer stdout.Close()
-		io.Copy(ctx.Stdout, stdout)
-	}()
+	stdin, err := cmd.StdinPipe()
+	if err != nil {
+		log.Println("server: err create pipeStdin")
+		return
+	}
 
 	// get pipe
 	go func() {
-		defer waitFinish.Done()
 		defer stdin.Close()
 		io.Copy(stdin, ctx.Stdin)
 	}()
 
 	// send errors
 	go func() {
-		defer waitFinish.Done()
-		defer stder.Close()
 		io.Copy(ctx.Stder, stder)
+	}()
+
+	// send response
+	go func() {
+		io.Copy(ctx.Stdout, stdout)
 	}()
 
 	err = cmd.Start()
@@ -51,6 +58,12 @@ func (ctx *Proccess) run_cmd(comand *utils.Command) {
 		log.Println("server: Wait command err", err)
 		return
 	}
-	waitFinish.Wait()
+
+	var readyAfterClose = make([]byte, 512)
+	_, err = ctx.Create.Write(readyAfterClose)
+	if err != nil {
+		log.Println("server: error read readyAfterClose", err)
+		return
+	}
 	log.Println("server: finish comand")
 }

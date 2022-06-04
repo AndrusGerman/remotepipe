@@ -22,7 +22,6 @@ type Proccess struct {
 var proccess = make(map[string]*Proccess)
 
 func NewProccess(data *connection.ConnectionMetadata, conn net.Conn) {
-
 	_, exist := proccess[data.ID]
 	if exist {
 		log.Println("server-CreateProccess: this proccess exist")
@@ -37,9 +36,14 @@ func NewProccess(data *connection.ConnectionMetadata, conn net.Conn) {
 }
 
 func SendToProccess(data *connection.ConnectionMetadata, conn net.Conn) {
+	if data.ID == "" {
+		log.Printf("server-SendToProccess: id is null '%s'\n", data.Type)
+		return
+	}
+
 	_, exist := proccess[data.ID]
 	if !exist {
-		log.Println("server-SendToProccess: this proccess do not exist")
+		log.Printf("server-SendToProccess: this proccess do not exist '%s' '%d'\n'%s'\n", data.ID, len(data.ID), data.Type)
 		conn.Close()
 		return
 	}
