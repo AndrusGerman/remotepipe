@@ -14,20 +14,23 @@ import (
 
 func create_dial(host string) (net.Conn, error) {
 	return net.Dial("tcp", host+":"+config.PortTCP)
+
 }
 
 func send_comand(host string, commandRaw string) {
 	conn, err := create_dial(host)
-	if err != err {
+	if err != nil {
 		log.Println("client: net dial connection create error", err)
 		os.Exit(1)
+		return
 	}
 	defer conn.Close()
 
 	err = connection.ConnectionSend("", connection.ConnectionTypeCreate, conn)
-	if err != err {
+	if err != nil {
 		log.Println("client: connection create error", err)
 		os.Exit(1)
+		return
 	}
 
 	var idBuffer = make([]byte, 1024)
@@ -80,18 +83,18 @@ func send_comand(host string, commandRaw string) {
 func create_stdin(id string, host string, waitFinish *sync.WaitGroup) {
 	defer waitFinish.Done()
 	conn, err := create_dial(host)
-	if err != err {
+	if err != nil {
 		log.Println("client: create stdin err", err)
 		os.Exit(1)
 	}
 	defer conn.Close()
 
 	err = connection.ConnectionSend(id, connection.ConnectionTypeStdin, conn)
-	if err != err {
+	if err != nil {
 		log.Println("client: connection create stdin error")
 	}
 	_, err = conn.Read(make([]byte, 512))
-	if err != err {
+	if err != nil {
 		log.Println("client: connection wait send stdin")
 	}
 
@@ -101,14 +104,14 @@ func create_stdin(id string, host string, waitFinish *sync.WaitGroup) {
 func create_stdout(id string, host string, waitFinish *sync.WaitGroup) {
 	defer waitFinish.Done()
 	conn, err := create_dial(host)
-	if err != err {
+	if err != nil {
 		log.Println("client: create stdout err", err)
 		os.Exit(1)
 	}
 	defer conn.Close()
 
 	err = connection.ConnectionSend(id, connection.ConnectionTypeStdout, conn)
-	if err != err {
+	if err != nil {
 		log.Println("client: connection create stdout error")
 	}
 	io.Copy(os.Stdout, conn)
@@ -117,14 +120,14 @@ func create_stdout(id string, host string, waitFinish *sync.WaitGroup) {
 func create_stder(id string, host string, waitFinish *sync.WaitGroup) {
 	defer waitFinish.Done()
 	conn, err := create_dial(host)
-	if err != err {
+	if err != nil {
 		log.Println("client: create stdout err", err)
 		os.Exit(1)
 	}
 	defer conn.Close()
 
 	err = connection.ConnectionSend(id, connection.ConnectionTypeStder, conn)
-	if err != err {
+	if err != nil {
 		log.Println("client: connection create stdout error")
 	}
 	io.Copy(os.Stderr, conn)
