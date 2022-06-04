@@ -1,7 +1,6 @@
 package server
 
 import (
-	"fmt"
 	"log"
 	"net"
 
@@ -44,7 +43,6 @@ func client_connections(client net.Conn) {
 			log.Println("server: error send id", err)
 			return
 		}
-		fmt.Println("ElID: ", id)
 
 		NewProccess(metadata, client)
 		return
