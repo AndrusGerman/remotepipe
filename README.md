@@ -38,6 +38,10 @@ ffmpeg -i biginput.mp4  -codec copy -map 0 -movflags +faststart -f matroska pipe
 ./remotepipe 192.168.101.7 "ffmpeg -y -i pipe:0 -c:v libx264 -f flv pipe:1" > newfile.mp4
 ```
 
+```bash
+ffmpeg -i input2.mp4 -codec copy -map 0 -movflags +faststart -f matroska pipe:1 | ./remotepipe scan "ffmpeg -y -i pipe:0 -c:v libx264 -f flv pipe:1" | ffplay -
+```
+
 searching for a text with grep
 ```bash
 cat /home/andrusd/Documentos/app.py  | ./remotepipe 192.168.101.7 "grep hello"
@@ -47,6 +51,18 @@ find the first device
 ```bash
 echo "hola" | ./remotepipe scan "cat /dev/stdin"
 ```
+
+
+copy files client -> to server
+```bash
+echo "hello world" | ./remotepipe scan "cp /dev/stdin hello.txt"
+```
+
+copy files server -> to client
+```bash
+echo "hello world" | ./remotepipe scan "cp /dev/stdin hello.txt"
+```
+
 
 ### Motivation
 With the need to render video without crashing my computer, I realized that my phone was powerful enough for this.
