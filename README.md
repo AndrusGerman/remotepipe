@@ -60,7 +60,7 @@ echo "hello world" | ./remotepipe scan "cp /dev/stdin hello.txt"
 
 copy files server -> to client
 ```bash
-echo "hello world" | ./remotepipe scan "cp /dev/stdin hello.txt"
+./remotepipe scan "cat bin.txt" > bin.txt 
 ```
 
 
