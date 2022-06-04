@@ -5,7 +5,7 @@ import (
 	"net"
 
 	"github.com/AndrusGerman/remotepipe/config"
-	"github.com/AndrusGerman/remotepipe/pkg/utils"
+	"github.com/AndrusGerman/remotepipe/pkg/connection"
 )
 
 func start_dial_tcp_server() error {
@@ -29,13 +29,17 @@ func start_dial_tcp_server() error {
 }
 
 func client_connections(client net.Conn) {
-	defer client.Close()
 
-	var command = new(utils.Command)
-	err := command.Get(client)
+	metadata, err := connection.ConnectionRead(client)
 	if err != nil {
 		log.Println("server: error read dial", err)
 		return
 	}
-	run_cmd(command, client)
+
+	if metadata.Type == connection.ConnectionTypeCreate {
+		NewProccess(metadata, client)
+		return
+	}
+
+	SendToProccess(metadata, client)
 }

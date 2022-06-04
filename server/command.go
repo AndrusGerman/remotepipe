@@ -3,32 +3,36 @@ package server
 import (
 	"io"
 	"log"
-	"net"
-	"os"
 	"os/exec"
 
 	"github.com/AndrusGerman/remotepipe/pkg/utils"
 )
 
-func run_cmd(comand *utils.Command, conn net.Conn) {
+func (ctx *Proccess) run_cmd(comand *utils.Command) {
 	var err error
 
-	log.Printf("comand: '%s', flags: '%v', flagsNumber: '%d' \n", comand.Command, comand.Flags, len(comand.Flags))
+	log.Printf("comand: '%s', flags: '%v'\n", comand.Command, comand.Flags)
 	cmd := exec.Command(comand.Command, comand.Flags...)
-	cmd.Stderr = os.Stderr
+	stder, _ := cmd.StderrPipe()
 	stdout, _ := cmd.StdoutPipe()
 	stdin, _ := cmd.StdinPipe()
-	defer stdout.Close()
-	defer stdin.Close()
 
 	// send response
 	go func() {
-		io.Copy(conn, stdout)
+		defer stdout.Close()
+		io.Copy(ctx.Stdout, stdout)
 	}()
 
 	// get pipe
 	go func() {
-		io.Copy(stdin, conn)
+		defer stdin.Close()
+		io.Copy(stdin, ctx.Stdin)
+	}()
+
+	// send errors
+	go func() {
+		defer stder.Close()
+		io.Copy(ctx.Stder, stder)
 	}()
 
 	err = cmd.Start()
@@ -40,5 +44,7 @@ func run_cmd(comand *utils.Command, conn net.Conn) {
 	err = cmd.Wait()
 	if err != nil {
 		log.Println("server: Wait command err", err)
+		return
 	}
+	log.Println("server: finish comand")
 }
