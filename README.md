@@ -34,3 +34,8 @@ searching for a text with grep
 ```bash
 cat /home/andrusd/Documentos/app.py  | ./remotepipe localhost "grep hello"
 ```
+
+### Motivation
+With the need to render video without crashing my computer, I realized that my phone was powerful enough for this.
+And I needed a way to connect parts of my pc's work with my phone's in real time, 'a data stream'
+Pipes seemed to work for me, but I needed a simple way to do this over a tcp connection.
