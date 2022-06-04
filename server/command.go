@@ -52,6 +52,7 @@ func (ctx *Proccess) run_cmd(comand *utils.Command) {
 		log.Println("server: start command err", err)
 		return
 	}
+	ctx.Stdin.Write(make([]byte, 512)) // send stdin signal send data
 
 	err = cmd.Wait()
 	if err != nil {

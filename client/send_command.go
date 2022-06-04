@@ -6,7 +6,6 @@ import (
 	"net"
 	"os"
 	"sync"
-	"time"
 
 	"github.com/AndrusGerman/remotepipe/config"
 	"github.com/AndrusGerman/remotepipe/pkg/connection"
@@ -76,7 +75,6 @@ func send_comand(host string, commandRaw string) {
 	}
 
 	waitFinish.Wait()
-	time.Sleep(1 * time.Second)
 }
 
 func create_stdin(id string, host string, waitFinish *sync.WaitGroup) {
@@ -92,6 +90,11 @@ func create_stdin(id string, host string, waitFinish *sync.WaitGroup) {
 	if err != err {
 		log.Println("client: connection create stdin error")
 	}
+	_, err = conn.Read(make([]byte, 512))
+	if err != err {
+		log.Println("client: connection wait send stdin")
+	}
+
 	io.Copy(conn, os.Stdin)
 }
 

@@ -70,7 +70,6 @@ func (ctx *Proccess) Close() {
 
 	if ctx.Stder != nil {
 		log.Println("close 1: send", ctx.Stder.Close())
-
 	}
 
 	if ctx.Stdin != nil {
