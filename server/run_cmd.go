@@ -1,6 +1,7 @@
 package server
 
 import (
+	"fmt"
 	"io"
 	"log"
 	"os/exec"
@@ -24,6 +25,16 @@ func (ctx *Proccess) run_cmd(comand *utils.Command) {
 	}
 	defer stdout.Close()
 	defer stder.Close()
+
+	// ready for close
+	defer func() {
+		var readyAfterClose = make([]byte, 512)
+		_, err = ctx.Create.Write(readyAfterClose)
+		if err != nil {
+			log.Println("server: error read readyAfterClose", err)
+			return
+		}
+	}()
 
 	stdin, err := cmd.StdinPipe()
 	if err != nil {
@@ -49,7 +60,9 @@ func (ctx *Proccess) run_cmd(comand *utils.Command) {
 
 	err = cmd.Start()
 	if err != nil {
-		log.Println("server: start command err", err)
+		errText := fmt.Sprint("server: start command err", err)
+		log.Println(errText)
+		fmt.Fprintln(ctx.Stder, errText)
 		return
 	}
 	ctx.Stdin.Write(make([]byte, 512)) // send stdin signal send data
@@ -60,11 +73,5 @@ func (ctx *Proccess) run_cmd(comand *utils.Command) {
 		return
 	}
 
-	var readyAfterClose = make([]byte, 512)
-	_, err = ctx.Create.Write(readyAfterClose)
-	if err != nil {
-		log.Println("server: error read readyAfterClose", err)
-		return
-	}
 	log.Println("server: finish comand")
 }
