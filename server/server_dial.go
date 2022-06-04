@@ -17,7 +17,6 @@ func start_dial_tcp_server() error {
 	var loop = true
 
 	for loop {
-		log.Println("server: waiting client")
 		client, err := server.Accept()
 		if err != nil {
 			log.Println("server: client connection fail", err)

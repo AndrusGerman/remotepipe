@@ -44,7 +44,8 @@ func send_comand(id string, host string, commandRaw string) {
 		os.Exit(1)
 	}
 
-	io.Copy(os.Stdout, conn)
+	var finishSignal = make([]byte, 512)
+	conn.Read(finishSignal)
 	waitFinish.Wait()
 }
 

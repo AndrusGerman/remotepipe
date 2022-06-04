@@ -3,6 +3,7 @@ package client
 import (
 	"fmt"
 	"log"
+	"math/rand"
 	"os"
 	"time"
 
@@ -10,7 +11,7 @@ import (
 )
 
 func Execute(args []string) {
-	var id = fmt.Sprint(time.Now().Unix())
+	var id = fmt.Sprint(time.Now().Unix(), rand.Int31())
 	var flagValid = validations.FlagIsValidClient(args)
 	if !flagValid {
 		log.Println("client: flag not valid")

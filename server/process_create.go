@@ -58,6 +58,10 @@ func (ctx *Proccess) Close() {
 	close(ctx.ChanStdin)
 	close(ctx.ChanStdout)
 
+	if ctx.Create != nil {
+		ctx.Create.Write([]byte("ok"))
+		ctx.Create.Close()
+	}
 	if ctx.Stder != nil {
 		ctx.Stder.Close()
 	}
@@ -66,9 +70,6 @@ func (ctx *Proccess) Close() {
 	}
 	if ctx.Stdin != nil {
 		ctx.Stdin.Close()
-	}
-	if ctx.Create != nil {
-		ctx.Create.Close()
 	}
 
 	delete(proccess, ctx.ID)
