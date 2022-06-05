@@ -5,7 +5,6 @@ import (
 	"log"
 	"net"
 	"os"
-	"sync"
 
 	"github.com/AndrusGerman/remotepipe/config"
 	"github.com/AndrusGerman/remotepipe/pkg/connection"
@@ -48,9 +47,6 @@ func send_comand(host string, commandRaw string) {
 		os.Exit(1)
 	}
 
-	var waitFinish = new(sync.WaitGroup)
-	waitFinish.Add(3)
-
 	// ready readyStart
 	var readyStart = make([]byte, 512)
 	_, err = conn.Read(readyStart)
@@ -59,9 +55,9 @@ func send_comand(host string, commandRaw string) {
 		os.Exit(1)
 	}
 
-	go create_stder(id, host, waitFinish)
-	go create_stdin(id, host, waitFinish)
-	go create_stdout(id, host, waitFinish)
+	go create_stder(id, host)
+	go create_stdin(id, host)
+	go create_stdout(id, host)
 
 	// ready readyAfterClose
 	_, err = conn.Read(make([]byte, 512))
@@ -76,12 +72,9 @@ func send_comand(host string, commandRaw string) {
 		log.Println("client: error send close stdout ", err)
 		os.Exit(1)
 	}
-
-	waitFinish.Wait()
 }
 
-func create_stdin(id string, host string, waitFinish *sync.WaitGroup) {
-	defer waitFinish.Done()
+func create_stdin(id string, host string) {
 	conn, err := create_dial(host)
 	if err != nil {
 		log.Println("client: create stdin err", err)
@@ -101,8 +94,7 @@ func create_stdin(id string, host string, waitFinish *sync.WaitGroup) {
 	io.Copy(conn, os.Stdin)
 }
 
-func create_stdout(id string, host string, waitFinish *sync.WaitGroup) {
-	defer waitFinish.Done()
+func create_stdout(id string, host string) {
 	conn, err := create_dial(host)
 	if err != nil {
 		log.Println("client: create stdout err", err)
@@ -117,8 +109,7 @@ func create_stdout(id string, host string, waitFinish *sync.WaitGroup) {
 	io.Copy(os.Stdout, conn)
 }
 
-func create_stder(id string, host string, waitFinish *sync.WaitGroup) {
-	defer waitFinish.Done()
+func create_stder(id string, host string) {
 	conn, err := create_dial(host)
 	if err != nil {
 		log.Println("client: create stdout err", err)
