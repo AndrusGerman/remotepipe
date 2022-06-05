@@ -13,6 +13,5 @@ func Execute(args []string) {
 		log.Println("client: flag not valid")
 		os.Exit(1)
 	}
-
 	send_comand(args[0], args[1])
 }

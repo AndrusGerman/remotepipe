@@ -41,7 +41,7 @@ func send_comand(host string, commandRaw string) {
 	}
 	var id = string(idBuffer)
 
-	command := utils.StringToCommand(commandRaw)
+	command := utils.GetCommandByStr(commandRaw)
 	err = command.Send(conn)
 	if err != err {
 		log.Println("client: net write command ", err)
