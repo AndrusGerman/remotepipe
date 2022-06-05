@@ -68,3 +68,9 @@ copy files server -> to client
 With the need to render video without crashing my computer, I realized that my phone was powerful enough for this.
 And I needed a way to connect parts of my pc's work with my phone's in real time, 'a data stream'
 Pipes seemed to work for me, but I needed a simple way to do this over a tcp connection.
+
+
+#### Alert
+Ironically it is possible to do this in a certain way with ssh, but it is necessary to encrypt data, which can lead to performance loss.
+`echo "andrus" | ssh -p 8095 andrus@192.168.101.5 "cat -"`
+Please avoid using this in production environments much of this is just proof of concept
